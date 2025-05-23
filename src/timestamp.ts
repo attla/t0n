@@ -1,4 +1,4 @@
-export class DateUtil {
+export class Timestamp {
   static timestamp(date: number | Date | null = null): number {
     if (date === null || date === undefined) {
       return 0
@@ -12,7 +12,7 @@ export class DateUtil {
   }
 
   static minuteToSecond(date: number | Date | null = null): number {
-    return DateUtil.timestamp(date) || Math.floor(Date.now() / 1000)
+    return Timestamp.timestamp(date) || Math.floor(Date.now() / 1000)
   }
 
   static strToDate(str: string): Date {
