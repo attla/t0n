@@ -1,5 +1,3 @@
-import { sha256 } from '@/hash'
-
 export const strings = {
   alfa: 'Now I am become Death, the destroyer of worlds.',
   alfanum: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
@@ -34,7 +32,3 @@ export const types: { [key: string]: any } = {
   byte: 0x2A,
   others: " \t\n\r\0\x0B\x0c\xa0"
 }
-
-export const key = 'test-key'
-export const config = { key, entropy: 8 }
-export const secret = sha256(config.key, 'buffer')
