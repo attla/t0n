@@ -19,8 +19,12 @@ export class Envir {
     if (this.memory().has(key))
       return this.memory().get(key, defaultValue) as T
 
-    const envValue = process?.env[key]
-    return envValue !== undefined ? envValue as T : defaultValue
+    try {
+      const envValue = process?.env[key]
+      return envValue !== undefined ? envValue as T : defaultValue
+    } catch {
+      return defaultValue
+    }
   }
 
   static set<T = any>(key: string, value: T): void {
