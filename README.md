@@ -11,6 +11,14 @@ To install the package, run:
 bun i t0n
 ```
 
+## Tests
+
+To perform the tests, run:
+
+```bash
+bun test
+```
+
 ## License
 
 This package is licensed under the [MIT license](https://github.com/attla/t0n/blob/main/LICENSE) © [Zunq](https://zunq.com)

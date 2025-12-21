@@ -7,28 +7,27 @@ export class Base64 {
     return length < 1 ? '' : Buffer.from(data).toString('base64')
   }
 
-    public static decode(data: string): string {
-      if (typeof data !== 'string')
-        throw new TypeError('Expected input to be a string')
+  public static decode(data: string): string {
+    if (typeof data !== 'string')
+      throw new TypeError('Expected input to be a string')
 
-      if (!/^[A-Za-z0-9+/]*={0,2}$/.test(data))
-        throw new Error('Invalid Base64 string')
+    if (!/^[A-Za-z0-9+/]*={0,2}$/.test(data))
+      throw new Error('Invalid Base64 string')
 
-      try {
-        return Buffer.from(data, 'base64').toString('utf8')
-      } catch (e) {
-        throw new Error('Invalid base64 characters')
-      }
+    try {
+      return Buffer.from(data, 'base64').toString('utf8')
+    } catch (e) {
+      throw new Error('Invalid base64 characters')
     }
+  }
 
   // https://www.npmjs.com/package/crypt?activeTab=code
   // https://github.com/puleos/object-hash/blob/master/index.js
   // https://github.com/shuding/stable-hash/blob/main/src/index.ts
   public static toString(data: any, type?: string): string | Uint8Array | ArrayBuffer {
     type ??= typeof data
-    if (Buffer.isBuffer(data)) {
-      return data
-    }
+    if (Buffer.isBuffer(data)) return data
+
     if (type === 'string') return data
     // if (type === 'string' || Buffer.isBuffer(data)) return data
 

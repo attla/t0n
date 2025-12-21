@@ -19,7 +19,7 @@ export class Envir {
     if (this.memory().has(key))
       return this.memory().get(key, defaultValue) as T
 
-    const envValue = process.env[key]
+    const envValue = process?.env[key]
     return envValue !== undefined ? envValue as T : defaultValue
   }
 
@@ -29,5 +29,13 @@ export class Envir {
 
   static remove(key: string): void {
     this.memory().remove(key)
+  }
+
+  static add<T = any>(data: Record<string, T> = {}): void {
+    this.memory().add(data)
+  }
+
+  static replace<T = any>(data: Record<string, T> = {}): void {
+    this.memory().replace(data)
   }
 }

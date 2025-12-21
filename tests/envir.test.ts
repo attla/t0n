@@ -95,4 +95,16 @@ describe('Envir', () => {
       expect(Envir.get<string>('empty_str')).toBe('')
     })
   })
+
+  it('should add multiple envs', () => {
+    Envir.add({non_existent_key: 0, non_existent_key2: 0})
+    expect(Envir.has('non_existent_key')).toBe(true)
+    expect(Envir.has('non_existent_key2')).toBe(true)
+  })
+
+  it('should replace all envs', () => {
+    Envir.replace({existent_key: 1})
+    expect(Envir.has('non_existent_key')).toBe(false)
+    expect(Envir.has('non_existent_key2')).toBe(false)
+  })
 })
