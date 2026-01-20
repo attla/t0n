@@ -1,4 +1,3 @@
-
 export type VALUE<T = any> = T | null | undefined | Symbol
 
 export class Attempt<T = any> {
