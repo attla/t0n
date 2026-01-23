@@ -1,23 +1,23 @@
-import { Attempt } from './attempt'
 import { DataBag } from './databag'
 
 export class Envir {
-  private static _memory: DataBag
+  static #memory: DataBag
 
-  private static memory(): DataBag {
-    if (!this._memory)
-      this._memory = new DataBag()
-
-    return this._memory
+  static {
+    this.#memory = new DataBag()
   }
 
   static has(key: string): boolean {
-    return Attempt.UNDEFINED !== this.get(key, Attempt.UNDEFINED)
+    try {
+      return this.#memory.has(key) || key in process.env
+    } catch {
+      return false
+    }
   }
 
   static get<T = any>(key: string, defaultValue?: T): T | undefined {
-    if (this.memory().has(key))
-      return this.memory().get(key, defaultValue) as T
+    if (this.#memory.has(key))
+      return this.#memory.get(key, defaultValue) as T
 
     try {
       const envValue = process?.env[key]
@@ -28,18 +28,18 @@ export class Envir {
   }
 
   static set<T = any>(key: string, value: T): void {
-    this.memory().set(key, value)
+    this.#memory.set(key, value)
   }
 
   static remove(key: string): void {
-    this.memory().remove(key)
+    this.#memory.remove(key)
   }
 
   static add<T = any>(data: Record<string, T> = {}): void {
-    this.memory().add(data)
+    this.#memory.add(data)
   }
 
   static replace<T = any>(data: Record<string, T> = {}): void {
-    this.memory().replace(data)
+    this.#memory.replace(data)
   }
 }

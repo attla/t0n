@@ -13,6 +13,20 @@ describe('Envir', () => {
     }
   })
 
+  describe('env operations', () => {
+    it('should get values from process.env', () => {
+      expect(Envir.get<string>('TEST_ENV_VAR')).toBe('env_value')
+    })
+
+    it('should return undefined for non-existent env vars', () => {
+      expect(Envir.get('NON_EXISTENT_VAR')).toBeUndefined()
+    })
+
+    it('should return default value for non-existent env vars', () => {
+      expect(Envir.get('NON_EXISTENT_VAR', 'default')).toBe('default')
+    })
+  })
+
   describe('memory operations', () => {
     it('should set and get values from memory', () => {
       Envir.set('memory_key', 'memory_value')
@@ -28,20 +42,6 @@ describe('Envir', () => {
       Envir.set('temp_key', 'temp_value')
       Envir.remove('temp_key')
       expect(Envir.get('temp_key')).toBeUndefined()
-    })
-  })
-
-  describe('env operations', () => {
-    it('should get values from process.env', () => {
-      expect(Envir.get<string>('TEST_ENV_VAR')).toBe('env_value')
-    })
-
-    it('should return undefined for non-existent env vars', () => {
-      expect(Envir.get('NON_EXISTENT_VAR')).toBeUndefined()
-    })
-
-    it('should return default value for non-existent env vars', () => {
-      expect(Envir.get('NON_EXISTENT_VAR', 'default')).toBe('default')
     })
   })
 

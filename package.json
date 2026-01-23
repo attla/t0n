@@ -1,7 +1,7 @@
 {
   "name": "t0n",
   "description": "Collection of elegant typescript resources for web artisans",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
