@@ -1,5 +1,5 @@
 export class Base64 {
-  public static encode(data: any): string {
+  static encode(data: any): string {
     const type = typeof data
     data = this.toString(data, type)
 
@@ -7,7 +7,7 @@ export class Base64 {
     return length < 1 ? '' : Buffer.from(data).toString('base64')
   }
 
-  public static decode(data: string): string {
+  static decode(data: string): string {
     if (typeof data !== 'string')
       throw new TypeError('Expected input to be a string')
 
@@ -24,7 +24,7 @@ export class Base64 {
   // https://www.npmjs.com/package/crypt?activeTab=code
   // https://github.com/puleos/object-hash/blob/master/index.js
   // https://github.com/shuding/stable-hash/blob/main/src/index.ts
-  public static toString(data: any, type?: string): string | Uint8Array | ArrayBuffer {
+  static toString(data: any, type?: string): string | Uint8Array | ArrayBuffer {
     type ??= typeof data
     if (Buffer.isBuffer(data)) return data
 
@@ -43,11 +43,11 @@ export class Base64 {
 }
 
 export class UrlSafeBase64 {
-  public static encode(data: any): string {
+  static encode(data: any): string {
     return Base64.encode(data)?.replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_') || ''
   }
 
-  public static decode(data: string): string {
+  static decode(data: string): string {
     const remainder = data.length % 4
     if (remainder)
         data += '='.repeat(4 - remainder)
