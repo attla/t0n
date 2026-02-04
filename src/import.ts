@@ -1,3 +1,3 @@
-export async function $import(path: string) {
+export async function IMPORT(path: string) {
   return import(path +'?v='+ Date.now())
 }
