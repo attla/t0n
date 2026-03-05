@@ -20,7 +20,8 @@ export class Timestamp {
   }
 
   static now(): number {
-    return Math.floor(Date.now() / 1000)
+    return Date.now() / 1000 | 0 // limited up to 32 bits - until 2038
+    // return Math.floor(Date.now() / 1000)
   }
 
   static addSeconds(timestamp: number, seconds: number): number {
