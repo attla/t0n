@@ -208,7 +208,7 @@ export const parseUA = (ua?: string | null): IUAResult => {
   return result
 }
 
-export const isBot = (ua: string) => parseUA(ua).os.type == 'bot'
-export const isMobile = (ua: string) => parseUA(ua).os.type == 'mobile'
-export const isTablet = (ua: string) => parseUA(ua).os.type == 'tablet'
-export const isDesktop = (ua: string) => parseUA(ua).os.type == 'desktop'
+export const isBot = (ua: string) => parseUA(ua).os.type === 'bot'
+export const isMobile = (ua: string) => parseUA(ua).os.type === 'mobile'
+export const isTablet = (ua: string) => parseUA(ua).os.type === 'tablet'
+export const isDesktop = (ua: string) => parseUA(ua).os.type === 'desktop'

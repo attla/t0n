@@ -1,20 +1,51 @@
 export interface Baggable<T = any> {
-  all(): Record<string, T>,
-  keys(): string[],
-  has(key: string): boolean,
-  add(data: Record<string, T>): void,
-  replace(data: Record<string, T>): void,
-  get(key: string, defaultValue?: T): T,
-  remove(key: string): void,
-  set(key: string, value: T): void,
-  clear(): void,
-  values(): T[],
-  toArray(): [string, T][],
-  toJson(options?: number): string,
+  all(): Record<string, T>
+  keys(): string[]
+  has(key: string): boolean
+  add(data: Record<string, T>): void
+  replace(data: Record<string, T>): void
+  get(key: string, defaultValue?: T): T
+  remove(key: string): void
+  set(key: string, value: T): void
+  clear(): void
+  values(): T[]
+  toArray(): [string, T][]
+  toJson(options?: number): string
+}
+
+function walk(
+  root: Record<string, any>,
+  path: string,
+  create = false
+): [Record<string, any>, string] | null {
+  let obj = root
+  let start = 0
+
+  for (let i = 0; i < path.length; i++) {
+    if (path.charCodeAt(i) === 46) { // '.'
+      const key = path.slice(start, i)
+      let next = obj[key]
+
+      if (next === undefined) {
+        if (!create) return null
+        next = obj[key] = {}
+      }
+
+      if (typeof next !== 'object' || next === null) {
+        if (!create) return null
+        next = obj[key] = {}
+      }
+
+      obj = next
+      start = i + 1
+    }
+  }
+
+  return [obj, path.slice(start)]
 }
 
 export class DataBag<T = any> implements Baggable<T> {
-  protected data: Record<string, T> = {}
+  protected data: Record<string, T>
 
   constructor(data: Record<string, T> = {}) {
     this.data = { ...data }
@@ -25,41 +56,80 @@ export class DataBag<T = any> implements Baggable<T> {
   }
 
   has(key: string): boolean {
-    return key in this.data
-  }
+    if (!key.includes('.'))
+      return key in this.data
 
-  add(data: Record<string, T> = {}): void {
-    this.data = { ...this.data, ...data }
-  }
+    const resolved = walk(this.data, key)
+    if (!resolved) return false
 
-  replace(data: Record<string, T> = {}): void {
-    this.data = { ...data }
+    const [obj, prop] = resolved
+    return prop in obj
   }
 
   get(key: string, defaultValue?: T): T {
-    return this.has(key) ? this.data[key] : defaultValue as T
+    if (!key.includes('.')) {
+      const v = this.data[key]
+      return (v !== undefined ? v : defaultValue) as T
+    }
+
+    const resolved = walk(this.data, key)
+    if (!resolved) return defaultValue as T
+
+    const [obj, prop] = resolved
+    const value = obj[prop]
+
+    return (value !== undefined ? value : defaultValue) as T
   }
 
-  set(key: string, value: T): void {
-    if (this.has(key) && typeof value != typeof this.data[key])
-      throw new TypeError(`Type mismatch for key ${key}. Expected ${typeof this.data[key]}, got ${typeof value}`)
+  set(key: string, value: T) {
+    if (!key.includes('.')) {
+      const current = this.data[key]
 
-    this.data[key] = value
+      if (current !== undefined && typeof current !== typeof value)
+        throw new TypeError(
+          `Type mismatch for key '${key}'. Expected ${typeof current}, got ${typeof value}`
+        )
+
+      this.data[key] = value
+      return
+    }
+
+    const resolved = walk(this.data, key, true)!
+    const [obj, prop] = resolved
+
+    const current = obj[prop]
+
+    if (current !== undefined && typeof current !== typeof value)
+      throw new TypeError(
+        `Type mismatch for key '${key}'. Expected ${typeof current}, got ${typeof value}`
+      )
+
+    obj[prop] = value
   }
 
-  remove(key: string): void {
-    delete this.data[key]
+  remove(key: string) {
+    if (!key.includes('.')) {
+      delete this.data[key]
+      return
+    }
+
+    const resolved = walk(this.data, key)
+    if (!resolved) return
+
+    const [obj, prop] = resolved
+    delete obj[prop]
   }
 
-  clear(): void {
+  add(data: Record<string, T> = {}) {
+    Object.assign(this.data, data)
+  }
+
+  replace(data: Record<string, T> = {}) {
+    this.data = { ...data }
+  }
+
+  clear() {
     this.data = {}
-  }
-
-  get length(): number {
-    return this.keys().length
-  }
-  get size(): number {
-    return this.length
   }
 
   keys(): string[] {
@@ -83,7 +153,15 @@ export class DataBag<T = any> implements Baggable<T> {
   }
 
   toJson(options: number = 0): string {
-    return JSON.stringify(this.all(), null, options)
+    return JSON.stringify(this.data, null, options)
+  }
+
+  get length(): number {
+    return Object.keys(this.data).length
+  }
+
+  get size(): number {
+    return this.length
   }
 
   [Symbol.iterator](): IterableIterator<[string, T]> {
