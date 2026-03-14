@@ -1,3 +1,6 @@
 export async function IMPORT(path: string) {
-  return import(path +'?v='+ Date.now())
+  if (process.platform === 'win32' && !path.startsWith('file://'))
+    path = 'file://' + path
+
+  return import(path + '?v=' + Date.now())
 }
