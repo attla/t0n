@@ -1,5 +1,6 @@
-export async function IMPORT(path: string, name: string): Promise<unknown>
-export async function IMPORT(path: string, ...name: string[]): Promise<Record<string, unknown>> {
+export async function IMPORT<T extends unknown>(path: string): Promise<T>
+export async function IMPORT<T extends unknown>(path: string, name: string): Promise<T>
+export async function IMPORT<T extends unknown>(path: string, ...name: string[]): Promise<Record<string, T>> {
   if (process.platform === 'win32' && !path.startsWith('file://'))
     path = 'file://' + path
 
