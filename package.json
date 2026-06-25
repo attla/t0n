@@ -1,13 +1,14 @@
 {
   "name": "t0n",
   "description": "Collection of elegant typescript resources for web artisans",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "type": "module",
   "main": "./src/index.ts",
   "files": ["src"],
   "exports": {
     ".": "./src/index.ts",
-    "./color": "./src/color.ts"
+    "./color": "./src/color.ts",
+    "./event": "./src/event.ts"
   },
   "scripts": {
     "bench": "tsx tests/benchmark/*.bench.ts",
