@@ -1,7 +1,7 @@
 {
   "name": "t0n",
   "description": "Collection of elegant typescript resources for web artisans",
-  "version": "0.20260702.0",
+  "version": "0.20260703.0",
   "type": "module",
   "main": "./src/index.ts",
   "files": ["src"],
@@ -10,7 +10,8 @@
     "./cli": "./src/cli.ts",
     "./color": "./src/color.ts",
     "./event": "./src/event.ts",
-    "./log": "./src/log.ts"
+    "./log": "./src/log.ts",
+    "./port": "./src/port.ts"
   },
   "scripts": {
     "bench": "tsx tests/benchmark/*.bench.ts"
