@@ -9,14 +9,14 @@ export function newID() {
   do {
     const bytes = new Uint8Array(8)
     crypto.getRandomValues(bytes)
-    
+
     id = UrlSafeBase64.encode(String.fromCharCode(...bytes)).slice(0, 8)
-    
+
     attempts++
   } while (idCache.has(id) && attempts < maxAttempts)
-  
+
   if (idCache.has(id))
     id = id.slice(0, 5) + Date.now().toString(36).slice(-3)
 
-  return id
+  return id.replace(/[-_]/g, '')
 }
