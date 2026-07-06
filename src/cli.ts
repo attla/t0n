@@ -34,11 +34,12 @@ export function shutdown(cb: (signal: string, e: unknown) => void | Promise<void
 
 export async function watch(
   cb: (e: ChokidarEventName | string, file: string) => Promise<void>,
-  paths: string[],
-  root?: string
+  paths: string | string[],
+  root?: string,
+  ignore?: string | RegExp | ((testString: string) => boolean)
 ) {
 	const codeWatcher = chokidar.watch(paths, {
-		ignored: /(^|[/\\])\../, // ignore hidden files
+		ignored: ignore ? ignore : /(^|[/\\])\../, // ignore hidden files
 		persistent: true,
 		ignoreInitial: true,
 		awaitWriteFinish: {
