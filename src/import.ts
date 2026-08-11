@@ -7,11 +7,11 @@ export async function IMPORT<T extends unknown>(path: string, ...name: string[])
   const source = path +'?v='+ Date.now()
 
   if (name.length > 0) {
-    const module = await import(source)
+    const mod = await import(source)
     const result: Record<string, any> = {}
     for (const n of name) {
-      if (n in module)
-        result[n] = module[n]
+      if (n in mod)
+        result[n] = mod[n]
       else
         throw new Error(`Module ${path} does not export ${n}`)
     }

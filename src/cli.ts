@@ -1,6 +1,6 @@
 import chokidar from 'chokidar'
 import { relative } from 'pathe'
-import { wait, log } from 't0n/log'
+import { wait, log, logo, error } from './log'
 
 export type ChokidarEventName = 'add' | 'addDir' | 'change' | 'unlink' | 'unlinkDir'
 
@@ -88,4 +88,70 @@ function getAssetChangeMessage(
 		default:
 			return `${path} changed`
 	}
+}
+
+export const killProcess = async (proc: Bun.Subprocess | null) => {
+  if (!proc || proc.exitCode !== null) return
+
+  try {
+    proc.kill('SIGTERM')
+
+    const exited = await Promise.race([
+      proc.exited.then(() => true),
+      new Promise(r => setTimeout(r, 1000)).then(() => false),
+    ])
+
+    if (!exited && proc.exitCode === null) {
+      proc.kill('SIGKILL')
+      await proc.exited
+    }
+  } catch (e) {
+    error('Error stopping:', e)
+  }
+}
+
+import { isColorSupported, dim } from './color'
+import { defineCommand, runMain, renderUsage } from 'citty'
+import type { ArgsDef, CommandContext, CommandDef } from 'citty'
+import { createConsola } from 'consola'
+
+export { defineCommand as command }
+export function cli({ name, description, version, commands, setup, cleanup }: {
+  name: string,
+  description?: string,
+  version: string,
+  commands: Record<string, string>,
+  setup?: ((context: CommandContext) => any | Promise<any>),
+  cleanup?: ((context: CommandContext) => any | Promise<any>)
+}) {
+  const _cli = description || name.toUpperCase()
+  const v = [_cli, isColorSupported ? dim('v'+version) : version].join(' ')
+
+  const _args = process.argv.slice(2)
+  const length = _args.length
+  if (!length || (length === 1 && ['-v', '--version', '--v', '-version'].includes(_args[0]?.toLowerCase()))) {
+    console.log(v)
+    process.exit(0)
+  }
+
+  console.log(`\n${logo} ${v}\n`)
+
+  const consola = createConsola({ formatOptions: {date: false} })
+  async function showUsage<T extends ArgsDef = ArgsDef>(cmd: CommandDef<T>, parent?: CommandDef<T>) {
+    try {
+      consola.log((await renderUsage(cmd, parent)).split('\n').slice(1).join('\n') + '\n')
+    } catch (error) {
+      consola.error(error)
+    }
+  }
+
+  runMain(defineCommand({
+    meta: {
+      name,
+      version: '',
+      description: _cli,
+    },
+    subCommands: Object.fromEntries(Object.entries(commands).map(([key, path]) => [key, () => import(path).then(r => r.default)])),
+    setup, cleanup,
+  }), { rawArgs: length ? undefined : ['-h'], showUsage })
 }

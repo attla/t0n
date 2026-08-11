@@ -31,8 +31,13 @@ export const substep = (...msg: any[]) => {
     console.log(`   ${gray('⁕')} ` + msg[i])
 }
 
-export const ln = () => console.log('\n')
-export const rn = () => console.log('\t')
+export const repeat = (max: number = 1, ...msg: any[]) => {
+  if (max < 2) return console.log(...msg)
+  for (let i = 0; i < max; i++)
+    console.log(...msg)
+}
+export const ln = (max: number = 1) => repeat(max, '\n')
+export const rn = (max: number = 1) => repeat(max, '\t')
 
 export const logo = gray(bold('λ'))
 export const prefixes = {

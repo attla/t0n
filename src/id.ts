@@ -17,6 +17,7 @@ export function newID() {
 
   if (idCache.has(id))
     id = id.slice(0, 5) + Date.now().toString(36).slice(-3)
+    // Math.random().toString(36).substring(2)
 
   return id.replace(/[-_]/g, '')
 }
