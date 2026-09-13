@@ -28,16 +28,14 @@
     "tsx": "catalog:",
     "typescript": "catalog:"
   },
-  "packageManager": "bun@1.3.14",
-  "engines": {
-    "node": ">=18.0.0"
-  },
+  "sideEffects": false,
+  "packageManager": "bun@1.4.0",
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
   },
-  "author": "Zunq <open-source@zunq.com>",
+  "author": "HUB <foss@hub.bi>",
   "license": "MIT",
-  "homepage": "https://zunq.dev",
+  "homepage": "https://hub.bi/docs/t0n",
   "repository": "git://github.com/attla/t0n",
   "bugs": "https://github.com/attla/t0n/issues",
   "keywords": [

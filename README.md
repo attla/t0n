@@ -1,6 +1,6 @@
 # `t0n`
 
-Collection of elegant typescript resources that are used across ZUNQ web applications.
+Collection of elegant typescript resources that are used across web applications.
 
 ## Install
 
@@ -21,4 +21,4 @@ bun test
 
 ## License
 
-This package is licensed under the [MIT license](https://github.com/attla/t0n/blob/main/LICENSE) © [Zunq](https://zunq.com)
+This package is licensed under the [MIT license](https://github.com/attla/t0n/blob/main/LICENSE) © [HUB](https://hub.bi)
