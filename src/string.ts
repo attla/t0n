@@ -1,6 +1,6 @@
 const normalize = (text: string, sep: string) =>
   text.replace(/([a-z])([A-Z])/g, `$1${sep}$2`)
-    .replace(/[\s\-_]+/g, sep)
+    .replace(/[\s\.\-_\/\\]+/g, sep)
     .toLowerCase()
     .replace(new RegExp(`[^\\w${sep}]+`, 'g'), '')
     .replace(new RegExp(`${sep}{2,}`, 'g'), sep)

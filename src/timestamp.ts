@@ -8,7 +8,7 @@ export class Timestamp {
       return Math.floor(date.getTime() / 1000)
     }
 
-    return 0
+    return Number(date) || 0
   }
 
   static minuteToSecond(date: number | Date | null = null): number {

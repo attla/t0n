@@ -1,8 +1,10 @@
-export function toInt(data: any[] | string | number): number {
-  if (typeof data === 'number' && Number.isInteger(data))
-    return data
+export function toInt(val: any[] | string | number): number {
+  if (typeof val === 'number')
+    return Math.abs(val)
+  // if (typeof data === 'number' && Number.isInteger(data))
+  //   return data
 
-  const jsonString = JSON.stringify(data)
+  const jsonString = JSON.stringify(val)
   // Simplified implementation without MD5 (less accurate than the original)
   // TODO: add o md5 and stable-hash
   const numericString = jsonString.replace(/\D/g, '')
