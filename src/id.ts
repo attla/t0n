@@ -1,4 +1,4 @@
-import { UrlSafeBase64 } from './base64'
+import { encodeBase64Url } from 'hono/utils/encode'
 
 const idCache = new Set<string>()
 
@@ -10,7 +10,7 @@ export function newID() {
     const bytes = new Uint8Array(8)
     crypto.getRandomValues(bytes)
 
-    id = UrlSafeBase64.encode(String.fromCharCode(...bytes)).slice(0, 8)
+    id = encodeBase64Url(bytes).slice(0, 8)
 
     attempts++
   } while (idCache.has(id) && attempts < maxAttempts)

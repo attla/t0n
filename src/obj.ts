@@ -22,18 +22,18 @@ export function isPath(key: string): boolean {
   return key.indexOf('.') !== -1
 }
 
-export function get<T = unknown>(obj: AnyObject, key: string): T | undefined {
-  if (key.indexOf('.') === -1) return obj[key] as T | undefined
+export function get<T = unknown>(obj: AnyObject, key: string, defaultValue?: T): T | undefined {
+  if (key.indexOf('.') === -1) return obj[key] as T | undefined ?? defaultValue
 
   const segments = parse(key)
   let current: any = obj
 
   for (let i = 0, l = segments.length; i < l; i++) {
-    if (current == null) return undefined
+    if (current == null) return defaultValue
     current = current[segments[i]]
   }
 
-  return current
+  return current ?? defaultValue
 }
 
 export function set(obj: AnyObject, key: string, value: unknown): void {
