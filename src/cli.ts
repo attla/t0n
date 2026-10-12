@@ -66,7 +66,7 @@ export async function watch(
 	codeWatcher.on('addDir', watcher('addDir'))
 	codeWatcher.on('unlinkDir', watcher('unlinkDir'))
 
-	wait('Watching for file changes')
+	wait('Watching file changes')
 }
 function getAssetChangeMessage(
 	e: ChokidarEventName,
