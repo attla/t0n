@@ -1,50 +1,65 @@
-import net from 'node:net'
-import { exec } from 'node:child_process'
+import { exec, execFile } from 'node:child_process'
 import { error, warn } from './log'
 
-export function withPort(desiredPort: number, cb: (port: number) => void, maxAttempts = 10) {
-  getAvailablePort(desiredPort)
+export function withPort(
+  desiredPort: number,
+  cb: (port: number) => void,
+  maxAttempts = 10,
+) {
+  getAvailablePort(desiredPort, maxAttempts)
     .then(([port, pid]) => {
-      if (port !== desiredPort)
-        warn(
-          `Port ${desiredPort} is in use by ${pid ? 'process '+ pid : 'an unknown process'}, using available port ${port} instead`
-        )
+      if (port !== desiredPort) {
+        warn(`Port ${desiredPort} is in use by ${
+          pid ? `process ${pid}` : 'an unknown process'
+        }, using available port ${port} instead`)
+      }
 
-      cb(Number(port))
-    }).catch(e => error('Error finding available port:', e))
+      cb(port)
+    })
+    .catch(e => error('Error finding available port:', e))
 }
 
-export async function isPortInUse(port: number) {
-  return new Promise(resolve => {
-    const server = net.createServer()
-      .once('error', () => resolve(true))
-      .once('listening', () => {
-        server.close(() => resolve(false))
-      })
-      .listen(port)
+export async function isPortInUse(port: number): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    execFile(
+      'lsof',
+      ['-nP', `-iTCP:${port}`, '-sTCP:LISTEN', '-t'],
+      { timeout: 1000 },
+      (err, stdout) => {
+        if (stdout.trim())
+          return resolve(true)
+
+        if (err && 'code' in err && err.code === 1)
+          return resolve(false)
+
+        if (err)
+          return reject(err)
+
+        resolve(false)
+      },
+    )
   })
 }
 
-export async function getAvailablePort(startPort: number, maxAttempts = 10) {
-  let port = startPort
-  let attempts = 0
+export async function getAvailablePort(
+  startPort: number,
+  maxAttempts = 10,
+): Promise<[number, string | null]> {
+  for (let i = 0; i < maxAttempts; i++) {
+    const port = startPort + i
 
-  while (attempts < maxAttempts) {
-    const inUse = await isPortInUse(port)
+    if (!await isPortInUse(port)) {
+      const pid = port === startPort
+        ? null
+        : await getProcessIdUsingPort(startPort)
 
-    if (!inUse && attempts) {
-      const pid = await getProcessIdUsingPort(startPort)
       return [port, pid]
     }
-
-    if (!inUse)
-      return [port, null]
-
-    port++
-    attempts++
   }
 
-  throw new Error(`No available ports found after ${maxAttempts} attempts`)
+  throw new Error(
+    `No available ports found after ${maxAttempts} attempts`,
+  )
 }
 
 export async function getProcessIdUsingPort(port: number): Promise<string | null> {
@@ -53,35 +68,32 @@ export async function getProcessIdUsingPort(port: number): Promise<string | null
 
   const pidPromise = new Promise<string | null>((resolve) => {
     const handleError = (e: Error) => {
+      if ((e as any).name === 'AbortError')
+        return resolve(null)
+
       error('Failed to get process ID for port', port, e)
       resolve(null)
     }
 
-    try { // Use lsof on Unix-like systems (macOS, Linux)
+    try { // use lsof on Unix-like systems (macOS, Linux)
       if (process.platform !== 'win32') {
         exec(
-          `lsof -ti:${port} -sTCP:LISTEN`,
-          { signal: processLookupController.signal },
+          `lsof -nP -iTCP:${port} -sTCP:LISTEN -t`,
+          { signal: processLookupController.signal, timeout: 2000 },
           (error, stdout) => {
-            if (error) {
-              handleError(error)
-              return
-            }
+            if (error) return handleError(error)
             // `-sTCP` will ensure there's only one port, clean up output
             const pid = stdout.trim()
             resolve(pid || null)
           }
         )
-      } else { // Use netstat on Windows
+      } else { // use netstat on Windows
         exec(
           `netstat -ano | findstr /C:":${port} " | findstr LISTENING`,
           { signal: processLookupController.signal },
           (error, stdout) => {
-            if (error) {
-              handleError(error)
-              return
-            }
-            // Clean up output and extract PID
+            if (error) return handleError(error)
+            // clean up output and extract PID
             const cleanOutput = stdout.replace(/\s+/g, ' ').trim()
             if (cleanOutput) {
               const lines = cleanOutput.split('\n')
@@ -100,16 +112,12 @@ export async function getProcessIdUsingPort(port: number): Promise<string | null
         )
       }
     } catch (cause) {
-      handleError(
-        new Error('Unexpected error during process lookup', { cause })
-      )
+      handleError(new Error('Unexpected error during process lookup', { cause }))
     }
   })
 
   const timeoutId = setTimeout(() => {
-    processLookupController.abort(
-      `PID detection timed out after ${timeoutMs}ms for port ${port}.`
-    )
+    processLookupController.abort(`PID detection timed out after ${timeoutMs}ms for port ${port}.`)
   }, timeoutMs)
 
   pidPromise.finally(() => clearTimeout(timeoutId))
