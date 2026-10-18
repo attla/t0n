@@ -2,8 +2,6 @@ import chokidar from 'chokidar'
 import { relative } from 'pathe'
 import { wait, log, logo, error } from './log'
 
-export type ChokidarEventName = 'add' | 'addDir' | 'change' | 'unlink' | 'unlinkDir'
-
 export function getRuntime() {
   try {
     return process?.isBun || typeof Bun !== 'undefined' ? 'bun' : 'node'
@@ -32,12 +30,16 @@ export function shutdown(cb: (signal: string, e: unknown) => void | Promise<void
   // process.on('exit', down('EXIT'))
 }
 
+export type ChokidarEventName = 'add' | 'addDir' | 'change' | 'unlink' | 'unlinkDir'
+export type EventBatch = [ChokidarEventName, string][]
 export async function watch(
-  cb: (e: ChokidarEventName | string, file: string) => Promise<void>,
+  cb: (e: EventBatch) => Promise<void>,
   paths: string | string[],
   root?: string,
-  ignore?: string | RegExp | ((testString: string) => boolean)
+  ignore?: string | RegExp | ((testString: string) => boolean),
+  delay?: number
 ) {
+  delay ||= 35
 	const codeWatcher = chokidar.watch(paths, {
 		ignored: ignore ? ignore : /(^|[/\\])\../, // ignore hidden files
 		persistent: true,
@@ -48,16 +50,19 @@ export async function watch(
 		},
   })
 
-  let restartTimeout: NodeJS.Timeout | null = null
+
+  const queue: EventBatch = []
+  let timer: NodeJS.Timeout | undefined
   const watcher = (e: ChokidarEventName) => async (file: string) => {
-		log(getAssetChangeMessage(e, file, root))
+    log(getAssetChangeMessage(e, file, root))
 
-		if (restartTimeout)
-			clearTimeout(restartTimeout)
+    queue.push([e, file])
 
-		restartTimeout = setTimeout(async () => {
-			await cb(e, file)
-		}, 300)
+		clearTimeout(timer)
+    timer = setTimeout(async () => {
+      await cb(queue)
+      queue.length = 0
+    }, delay)
 	}
 
 	codeWatcher.on('change', watcher('change'))
