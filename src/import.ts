@@ -4,10 +4,10 @@ export async function IMPORT<T extends unknown>(path: string, ...name: string[])
   if (process.platform === 'win32' && !path.startsWith('file://'))
     path = 'file://' + path
 
-  const source = path +'?v='+ Date.now()
+  delete require.cache[path]
 
   if (name.length > 0) {
-    const mod = await import(source)
+    const mod = await import(path)
     const result: Record<string, any> = {}
     for (const n of name) {
       if (n in mod)
@@ -19,5 +19,5 @@ export async function IMPORT<T extends unknown>(path: string, ...name: string[])
     return name.length === 1 ? result[name[0]] : result
   }
 
-  return import(source)
+  return import(path)
 }
